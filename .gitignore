@@ -1,0 +1,31 @@
+# --- Fichiers d'Eclipse ---
+.metadata/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.classpath
+.project
+.env
+# --- Fichiers de compilation et serveur ---
+build/
+target/
+.deployables/
+.recommenders/
+
+# --- Logs et fichiers temporaires de Tomcat ---
+logs/
+work/
+temp/
+
+# --- Fichiers Système ---
+.DS_Store
+Thumbs.db
+apache-tomcat-9.0.100/
+# --- Sécurité (IMPORTANT) ---
+# Si tu as un fichier de config avec tes mots de passe de base de données
+# config.properties

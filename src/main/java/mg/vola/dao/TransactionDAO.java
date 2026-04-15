@@ -1,0 +1,198 @@
+package mg.vola.dao;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import mg.vola.models.Envoi;
+import mg.vola.models.Recette;
+import mg.vola.models.Retrait;
+import utils.Connexion;
+
+public class TransactionDAO {
+
+    // 1. ENVOYER DE L'ARGENT
+    public void effectuerEnvoi(Envoi env, int fraisEnv, int fraisRetrait) throws SQLException {
+        Connection con = Connexion.getConnection();
+        try {
+            con.setAutoCommit(false); 
+
+            // Suppression de frais_env et frais_retrait_paye de la requête
+            String sqlEnvoi = "INSERT INTO envoi (idenv, numenvoyeur, numrecepteur, montant, date, payer_frais_retrait, raison) VALUES (?,?,?,?,?,?,?)";
+            PreparedStatement pstEnv = con.prepareStatement(sqlEnvoi);
+            pstEnv.setString(1, env.getIdEnv());
+            pstEnv.setString(2, env.getNumEnvoyeur());
+            pstEnv.setString(3, env.getNumRecepteur());
+            pstEnv.setInt(4, env.getMontant());
+            pstEnv.setTimestamp(5, env.getDate());
+            pstEnv.setBoolean(6, env.isPayer_frais_retrait());
+            pstEnv.setString(7, env.getRaison());
+            pstEnv.executeUpdate();
+
+            // Mise à jour solde ENVOYEUR (On garde le calcul des frais pour impacter le solde)
+            int totalADebiter = env.getMontant() + fraisEnv;
+            if(env.isPayer_frais_retrait()) totalADebiter += fraisRetrait;
+            
+            String sqlUpEnvoyeur = "UPDATE client SET solde = solde - ? WHERE numtel = ?";
+            PreparedStatement pstUpE = con.prepareStatement(sqlUpEnvoyeur);
+            pstUpE.setInt(1, totalADebiter);
+            pstUpE.setString(2, env.getNumEnvoyeur());
+            pstUpE.executeUpdate();
+
+            // Mise à jour solde RECEPTEUR 
+            String sqlUpRecepteur = "UPDATE client SET solde = solde + ? WHERE numtel = ?";
+            PreparedStatement pstUpR = con.prepareStatement(sqlUpRecepteur);
+            pstUpR.setInt(1, env.getMontant());
+            pstUpR.setString(2, env.getNumRecepteur());
+            pstUpR.executeUpdate();
+
+            con.commit(); 
+        } catch (SQLException e) {
+            if (con != null) con.rollback(); 
+            throw e;
+        } finally {
+            if (con != null) con.close();
+        }
+    }
+
+    // 2. LISTER LES DERNIERS ENVOIS
+    public List<Envoi> listerDerniersEnvois() throws SQLException {
+        List<Envoi> liste = new ArrayList<>();
+        // Sélection uniquement des colonnes existantes
+        String sql = "SELECT idenv, numenvoyeur, numrecepteur, montant, date, payer_frais_retrait, raison FROM envoi ORDER BY date DESC LIMIT 10";
+        
+        try (Connection con = Connexion.getConnection();
+             PreparedStatement pst = con.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            
+            while (rs.next()) {
+                Envoi e = new Envoi();
+                e.setIdEnv(rs.getString("idenv"));
+                e.setNumEnvoyeur(rs.getString("numenvoyeur"));
+                e.setNumRecepteur(rs.getString("numrecepteur"));
+                e.setMontant(rs.getInt("montant"));
+                e.setDate(rs.getTimestamp("date"));
+                e.setPayer_frais_retrait(rs.getBoolean("payer_frais_retrait"));
+                e.setRaison(rs.getString("raison"));
+                liste.add(e);
+            }
+        }
+        return liste;
+    }
+
+    // 3. EFFECTUER UN RETRAIT
+    public void effectuerRetrait(Retrait ret, int fraisRetrait) throws SQLException {
+        Connection con = Connexion.getConnection();
+        try {
+            con.setAutoCommit(false);
+
+            String sqlRet = "INSERT INTO retrait (idrecep, numtel, montant, daterecep) VALUES (?,?,?,?)";
+            PreparedStatement pst = con.prepareStatement(sqlRet);
+            pst.setString(1, ret.getIdrecep());
+            pst.setString(2, ret.getNumtel());
+            pst.setInt(3, ret.getMontant());
+            pst.setTimestamp(4, ret.getDaterecep());
+            pst.executeUpdate();
+
+            String sqlUp = "UPDATE client SET solde = solde - ? WHERE numtel = ?";
+            PreparedStatement pstUp = con.prepareStatement(sqlUp);
+            pstUp.setInt(1, ret.getMontant() + fraisRetrait);
+            pstUp.setString(2, ret.getNumtel());
+            pstUp.executeUpdate();
+
+            con.commit();
+        } catch (SQLException e) {
+            if (con != null) con.rollback();
+            throw e;
+        } finally {
+            if (con != null) con.close();
+        }
+    }
+
+  // 4. LISTER LES DERNIERS RETRAITS
+    public List<Retrait> listerDerniersRetraits() throws SQLException {
+        List<Retrait> liste = new ArrayList<>();
+        // Requête sur la table retrait (tout en minuscule)
+        String sql = "SELECT idrecep, numtel, montant, daterecep FROM retrait ORDER BY daterecep DESC LIMIT 10";
+        
+        try (Connection con = Connexion.getConnection();
+             PreparedStatement pst = con.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            
+            while (rs.next()) {
+                Retrait r = new Retrait();
+                r.setIdrecep(rs.getString("idrecep"));
+                r.setNumtel(rs.getString("numtel"));
+                r.setMontant(rs.getInt("montant"));
+                r.setDaterecep(rs.getTimestamp("daterecep"));
+                liste.add(r);
+            }
+        }
+        return liste;
+    }
+    // 5. RECETTE TOTALE
+    public Recette calculerRecettesGlobales() throws SQLException {
+        Recette recette = new Recette();
+        
+        String sqlEnvoi = "SELECT SUM(frais_env) FROM envoi";
+        String sqlRetrait = "SELECT SUM(frais_retrait) FROM retrait";
+
+        try (Connection con = Connexion.getConnection()) {
+            // 1. Récupération des frais d'envoi
+            try (PreparedStatement pst = con.prepareStatement(sqlEnvoi);
+                 ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    recette.setTotalFraisEnvoi(rs.getInt(1));
+                }
+            }
+
+            // 2. Récupération des frais de retrait
+            try (PreparedStatement pst = con.prepareStatement(sqlRetrait);
+                 ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    recette.setTotalFraisRetrait(rs.getInt(1));
+                }
+            }
+        }
+        return recette;
+    }
+    
+    public List<String[]> getHistoriquePourPdf(String numTel) throws SQLException {
+        List<String[]> liste = new ArrayList<>();
+        
+        // On force les types sur CHAQUE colonne de CHAQUE SELECT pour éviter toute ambiguïté
+        String sql = 
+            "SELECT date::text as d, raison::text as r, montant::integer as m, 'DEBIT'::text as t " +
+            "FROM envoi WHERE numenvoyeur = ? " +
+            "UNION ALL " +
+            "SELECT daterecep::text, 'Retrait d''argent'::text, montant::integer, 'DEBIT'::text " +
+            "FROM retrait WHERE numtel = ? " +
+            "UNION ALL " +
+            "SELECT date::text, raison::text, montant::integer, 'CREDIT'::text " +
+            "FROM envoi WHERE numrecepteur = ? " +
+            "ORDER BY 1 ASC";
+
+        try (Connection con = Connexion.getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            
+            pst.setString(1, numTel);
+            pst.setString(2, numTel);
+            pst.setString(3, numTel);
+            
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    String dateBrute = rs.getString(1);
+                    // On s'assure que la date est propre (YYYY-MM-DD)
+                    String datePropre = (dateBrute != null && dateBrute.length() >= 10) ? dateBrute.substring(0, 10) : dateBrute;
+
+                    liste.add(new String[]{
+                        datePropre, 
+                        rs.getString(2), 
+                        String.valueOf(rs.getInt(3)), 
+                        rs.getString(4)
+                    });
+                }
+            }
+        }
+        return liste;
+    }
+}
