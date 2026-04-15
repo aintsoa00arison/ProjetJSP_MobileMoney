@@ -1,15 +1,18 @@
 package mg.vola.models;
+
 import java.sql.Timestamp;
 
 public class Retrait {
     private String idrecep;
     private String numtel;
     private int montant;
-    private Timestamp daterecep; // Type datetime 
+    private Timestamp daterecep;
+    
+    // Nouvelle colonne pour la recette de retrait
+    private int frais_retrait_paye;
 
     public Retrait() {}
 
-    // Getters et Setters
     public String getIdrecep() { return idrecep; }
     public void setIdrecep(String idrecep) { this.idrecep = idrecep; }
 
@@ -21,4 +24,8 @@ public class Retrait {
 
     public Timestamp getDaterecep() { return daterecep; }
     public void setDaterecep(Timestamp daterecep) { this.daterecep = daterecep; }
+
+    // Nouveau Getter et Setter
+    public int getFrais_retrait() { return frais_retrait_paye; }
+    public void setFrais_retrait(int frais_retrait) { this.frais_retrait_paye= frais_retrait; }
 }

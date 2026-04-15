@@ -24,53 +24,81 @@ public class RelevePdfServlet extends HttpServlet {
             throws ServletException, IOException {
         
         String numTel = request.getParameter("numtel");
+        String moisChoisi = request.getParameter("mois"); // Format attendu : "YYYY-MM" (ex: 2026-04)
 
         try {
-            // 1. Récupération des données
+            // 1. Récupération et vérification du client
             Client client = clientDAO.trouverClient(numTel);
             if (client == null) {
                 response.sendRedirect("transaction.jsp?msg=error_client");
                 return;
             }
-            
-            List<String[]> operations = transDAO.getHistoriquePourPdf(numTel);
 
-            // 2. Configuration du PDF
+            // 2. Logique pour le nom du fichier et l'affichage de la période
+            String nomMois = "Inconnu";
+            String annee = "";
+            
+            if (moisChoisi != null && moisChoisi.contains("-")) {
+                String[] parts = moisChoisi.split("-");
+                annee = parts[0];
+                int moisIndex = Integer.parseInt(parts[1]);
+
+                String[] moisNoms = {
+                    "janvier", "fevrier", "mars", "avril", "mai", "juin",
+                    "juillet", "aout", "septembre", "octobre", "novembre", "decembre"
+                };
+                
+                if (moisIndex >= 1 && moisIndex <= 12) {
+                    nomMois = moisNoms[moisIndex - 1];
+                }
+            }
+
+            // Construction du nom de fichier : releve_034..._avril_2026.pdf
+            String nomFichier = "releve_" + numTel + "_" + nomMois + "_" + annee + ".pdf";
+
+            // 3. Récupération des données filtrées par mois
+            List<String[]> operations = transDAO.getHistoriquePourPdf(numTel, moisChoisi);
+
+            // 4. Configuration de la réponse PDF
             response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=releve_" + numTel + ".pdf");
+            response.setHeader("Content-Disposition", "attachment; filename=" + nomFichier);
 
             Document document = new Document();
             PdfWriter.getInstance(document, response.getOutputStream());
             document.open();
 
-            // --- DESIGN DU RELEVÉ (Basé sur ton image) ---
+            // --- DESIGN DU RELEVÉ ---
 
             // Titre
             Font fontTitre = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Font.UNDERLINE);
-            document.add(new Paragraph("Exemple d'un relevé d'opération", fontTitre));
+            document.add(new Paragraph("Relevé d'opération", fontTitre));
             
-            // Date du jour (ou mois sélectionné)
-            Paragraph pDate = new Paragraph("Date : Avril 2024");
-            pDate.setAlignment(Element.ALIGN_RIGHT);
-            document.add(pDate);
+            // Affichage de la période sélectionnée
+            Paragraph pPeriode = new Paragraph("Période : " + nomMois.toUpperCase() + " " + annee);
+            pPeriode.setAlignment(Element.ALIGN_RIGHT);
+            document.add(pPeriode);
             document.add(new Paragraph("\n"));
 
             // Infos Client
             document.add(new Paragraph("Contact : " + client.getNumtel()));
-            document.add(new Paragraph(client.getNom()));
+            document.add(new Paragraph("Nom : " + client.getNom()));
             document.add(new Paragraph("Solde actuel : " + formatPoints(client.getSolde()) + " Ariary"));
             document.add(new Paragraph("\n"));
 
-            // --- TABLEAU ---
+            // --- TABLEAU DES OPÉRATIONS ---
             PdfPTable table = new PdfPTable(4); 
             table.setWidthPercentage(100);
             table.setSpacingBefore(10f);
             
-            // En-têtes
-            table.addCell("Date");
-            table.addCell("Raison");
-            table.addCell("Débit");
-            table.addCell("Crédit");
+            // En-têtes (Stylisés en gris léger)
+            PdfPCell cellHeader;
+            String[] headers = {"Date", "Raison", "Débit", "Crédit"};
+            for (String h : headers) {
+                cellHeader = new PdfPCell(new Phrase(h, FontFactory.getFont(FontFactory.HELVETICA_BOLD)));
+                cellHeader.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                cellHeader.setPadding(5);
+                table.addCell(cellHeader);
+            }
 
             int totalDebit = 0;
             int totalCredit = 0;
@@ -97,9 +125,12 @@ public class RelevePdfServlet extends HttpServlet {
             }
             document.add(table);
 
-            // --- TOTAUX (Bas de l'image) ---
-            document.add(new Paragraph("\nTotal Débit : " + formatPoints(totalDebit) + " Ar"));
-            document.add(new Paragraph("Total Crédit : " + formatPoints(totalCredit) + " Ar"));
+            // --- TOTAUX ---
+            Paragraph pTotaux = new Paragraph();
+            pTotaux.setSpacingBefore(15);
+            pTotaux.add(new Chunk("\nTotal Débit : " + formatPoints(totalDebit) + " Ar\n"));
+            pTotaux.add(new Chunk("Total Crédit : " + formatPoints(totalCredit) + " Ar"));
+            document.add(pTotaux);
 
             document.close();
 
@@ -109,7 +140,9 @@ public class RelevePdfServlet extends HttpServlet {
         }
     }
 
-    // Fonction pour avoir les points comme sur ton image (50.000)
+    /**
+     * Formate les montants avec des points comme séparateurs de milliers (ex: 50.000)
+     */
     private String formatPoints(int montant) {
         return String.format("%, d", montant).replace(',', '.').trim();
     }
