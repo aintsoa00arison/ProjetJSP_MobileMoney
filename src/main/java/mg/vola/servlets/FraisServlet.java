@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Date;
 
 import mg.vola.dao.FraisDAO;
 import mg.vola.models.FraisEnvoi;
@@ -24,6 +25,9 @@ public class FraisServlet extends HttpServlet {
         String typeTable = request.getParameter("type_frais"); 
         String action = request.getParameter("action");
         String id = request.getParameter("id");
+        if(id == null || id.isEmpty()){
+            id = new Date().toString().replaceAll("\\s","");
+        }
 
         // Logs pour débugger dans la console de l'IDE
         System.out.println("--- DEBUG FRAIS SERVLET ---");
@@ -82,6 +86,10 @@ public class FraisServlet extends HttpServlet {
             System.err.println("ERREUR DANS FRAIS SERVLET: " + e.getMessage());
             e.printStackTrace();
             // Redirection avec message d'erreur
+            response.sendRedirect("frais.jsp?msg=error");
+        } catch (Exception e) {
+            System.err.println("ERREUR DANS FRAIS SERVLET: " + e.getMessage());
+            e.printStackTrace();
             response.sendRedirect("frais.jsp?msg=error");
         }
     }

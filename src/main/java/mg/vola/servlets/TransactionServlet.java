@@ -18,7 +18,7 @@ import mg.vola.models.Envoi;
 import mg.vola.models.Retrait;
 import mg.vola.models.Client;
 import java.io.FileInputStream;
-import java.io.IOException;
+
 @WebServlet("/TransactionServlet")
 public class TransactionServlet extends HttpServlet {
     private TransactionDAO transDAO = new TransactionDAO();
@@ -26,8 +26,8 @@ public class TransactionServlet extends HttpServlet {
     private ClientDAO clientDAO = new ClientDAO();
 
     // Configuration SMTP
-    private final String MON_EMAIL = "ainasoa00@gmail.com"; 
-    private final String MON_PASS = "hkdvyzdjrlyujbju"; 
+    private final String MON_EMAIL = "ainasoa00@gmail.com";
+    private final String MON_PASS = "hkdvyzdjrlyujbju";
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
@@ -161,16 +161,19 @@ public class TransactionServlet extends HttpServlet {
         if (to == null || to.isEmpty()) return;
 
         // --- CHARGEMENT DES VARIABLES DEPUIS LE .ENV ---
+        String myEmail;
+        String myPass;
         Properties env = new Properties();
         try (FileInputStream fis = new FileInputStream(getServletContext().getRealPath("/") + "../../.env")) {
             env.load(fis);
+            myEmail = env.getProperty("EMAIL_USER", MON_EMAIL);
+            myPass = env.getProperty("EMAIL_PASS", MON_PASS);
         } catch (IOException e) {
             // Si le chemin relatif ne marche pas dans ton Eclipse, essaie un chemin absolu pour tester
             System.out.println("Erreur chargement .env : " + e.getMessage());
+            myEmail = MON_EMAIL;
+            myPass = MON_PASS;
         }
-
-        String myEmail = env.getProperty("EMAIL_USER");
-        String myPass = env.getProperty("EMAIL_PASS");
 
         // --- CONFIGURATION SMTP ---
         Properties props = new Properties();
@@ -179,9 +182,12 @@ public class TransactionServlet extends HttpServlet {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
 
+
+        String finalMyEmail = myEmail;
+        String finalMyPass = myPass;
         Session session = Session.getInstance(props, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(myEmail, myPass);
+                return new PasswordAuthentication(finalMyEmail, finalMyPass);
             }
         });
 

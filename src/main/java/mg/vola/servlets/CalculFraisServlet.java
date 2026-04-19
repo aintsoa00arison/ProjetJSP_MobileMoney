@@ -24,7 +24,7 @@ public class CalculFraisServlet extends HttpServlet {
         try {
             String mStr = request.getParameter("montant");
             String rStr = request.getParameter("retrait");
-            System.out.println("💰 Montant reçu : " + mStr + " | Retrait : " + rStr);
+            System.out.println("Montant reçu : " + mStr + " | Retrait : " + rStr);
 
             int montant = Integer.parseInt(mStr);
             boolean avecRetrait = Boolean.parseBoolean(rStr);
@@ -32,7 +32,7 @@ public class CalculFraisServlet extends HttpServlet {
             int fEnv = fraisDAO.chercherFraisPourMontant(montant);
             int fRet = avecRetrait ? fraisDAO.chercherFraisRecPourMontant(montant) : 0;
             
-            System.out.println("✅ Résultats BDD -> Envoi: " + fEnv + " | Retrait: " + fRet);
+            System.out.println("Résultats BDD -> Envoi: " + fEnv + " | Retrait: " + fRet);
             System.out.println("==============================================");
 
             response.setContentType("text/plain");
@@ -40,7 +40,7 @@ public class CalculFraisServlet extends HttpServlet {
             response.getWriter().write(fEnv + "," + fRet);
             
         } catch (Exception e) {
-            System.err.println("❌ ERREUR SERVLET : " + e.getMessage());
+            System.err.println("ERREUR SERVLET : " + e.getMessage());
             response.setStatus(500);
             response.getWriter().write("0,0");
         }

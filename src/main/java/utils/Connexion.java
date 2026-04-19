@@ -26,9 +26,9 @@ public class Connexion {
             }
 
             // Lecture des variables (si le fichier n'existe pas, on met des valeurs de secours)
-            String url = env.getProperty("DB_URL", "jdbc:postgresql://localhost:5432/MobileMoneyData");
+            String url = env.getProperty("DB_URL", "jdbc:postgresql://localhost:5432/mobilemoney");
             String user = env.getProperty("DB_USER", "postgres");
-            String password = env.getProperty("DB_PASSWORD", "123");
+            String password = env.getProperty("DB_PASSWORD", "1234");
 
             Class.forName("org.postgresql.Driver");
             con = DriverManager.getConnection(url, user, password);

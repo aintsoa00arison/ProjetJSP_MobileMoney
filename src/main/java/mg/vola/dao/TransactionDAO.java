@@ -61,7 +61,7 @@ public class TransactionDAO {
     public List<Envoi> listerDerniersEnvois() throws SQLException {
         List<Envoi> liste = new ArrayList<>();
         // Sélection uniquement des colonnes existantes
-        String sql = "SELECT idenv, numenvoyeur, numrecepteur, montant, date, payer_frais_retrait, raison FROM envoi ORDER BY date DESC LIMIT 10";
+        String sql = "SELECT idenv, numenvoyeur, numrecepteur, montant, date, payer_frais_retrait, raison,frais_retrait_paye FROM envoi ORDER BY date DESC LIMIT 10";
         
         try (Connection con = Connexion.getConnection();
              PreparedStatement pst = con.prepareStatement(sql);
@@ -76,6 +76,7 @@ public class TransactionDAO {
                 e.setDate(rs.getTimestamp("date"));
                 e.setPayer_frais_retrait(rs.getBoolean("payer_frais_retrait"));
                 e.setRaison(rs.getString("raison"));
+                e.setFrais_retrait_paye(rs.getInt("frais_retrait_paye"));
                 liste.add(e);
             }
         }
@@ -139,9 +140,9 @@ public class TransactionDAO {
         Recette recette = new Recette();
         
         // On somme les frais d'envoi ET les frais de retrait payés par l'envoyeur
-        String sqlEnvoi = "SELECT SUM(frais_env_paye)FROM envoi";
+        String sqlEnvoi = "SELECT SUM(frais_env) FROM envoi";
         // On somme les frais de retrait payés lors d'un retrait au guichet
-        String sqlRetrait = "SELECT SUM(frais_retrait_paye) FROM retrait";
+        String sqlRetrait = "SELECT SUM(frais_retrait) FROM retrait";
 
         try (Connection con = Connexion.getConnection()) {
             try (PreparedStatement pst = con.prepareStatement(sqlEnvoi);

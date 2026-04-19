@@ -13,9 +13,20 @@ public class FraisDAO {
     // CRUD POUR FRAIS_ENVOI (Table FRAIS_ENVOI)
     // ==========================================================
 
-    public void ajouterFraisEnv(FraisEnvoi f) throws SQLException {
+    public void ajouterFraisEnv(FraisEnvoi f) throws Exception {
         String sql = "INSERT INTO FRAIS_ENVOI (idEnv, montant1, montant2, frais_env) VALUES (?, ?, ?, ?)";
-        try (Connection con = Connexion.getConnection(); 
+        if(f.getMontant1() > f.getMontant2()){
+            throw new Exception("Montant 1 doit etre inférieur au montant 2");
+        }
+
+        List<FraisEnvoi> liste_frais = listerFraisEnv();
+        for (FraisEnvoi fraisEnvoi : liste_frais) {
+            if(f.getMontant1() <= fraisEnvoi.getMontant2() && f.getMontant2() >= fraisEnvoi.getMontant1()){
+                throw new Exception("intervalle existant");
+            }
+        }
+
+        try (Connection con = Connexion.getConnection();
              PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, f.getIdEnv());
             pst.setInt(2, f.getMontant1());
@@ -68,8 +79,20 @@ public class FraisDAO {
     // CRUD POUR FRAIS_RECEP (Table FRAIS_RECEP)
     // ==========================================================
 
-    public void ajouterFraisRec(FraisRecep f) throws SQLException {
+    public void ajouterFraisRec(FraisRecep f) throws SQLException,Exception {
         String sql = "INSERT INTO FRAIS_RECEP (idRec, montant1, montant2, frais_rec) VALUES (?, ?, ?, ?)";
+
+        if(f.getMontant1() > f.getMontant2()){
+            throw new Exception("Montant 1 doit etre inférieur au montant 2");
+        }
+
+        List<FraisRecep> liste_frais = listerFraisRec();
+        for (FraisRecep frais : liste_frais) {
+            if(f.getMontant1() <= frais.getMontant2() && f.getMontant2() >= frais.getMontant1()){
+                throw new Exception("intervalle existant");
+            }
+        }
+
         try (Connection con = Connexion.getConnection(); 
              PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, f.getIdRec());
