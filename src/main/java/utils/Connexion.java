@@ -10,33 +10,36 @@ public class Connexion {
     
     public static Connection getConnection() {
         Connection con = null;
-        try {
-            Properties env = new Properties();
-            
-            // On essaie de trouver le fichier .env à la racine du projet
-            // Dans Eclipse/Tomcat, la racine est souvent le dossier de l'IDE
-            // On va tester plusieurs chemins possibles pour être sûr
-            String path = System.getProperty("user.dir") + File.separator + ".env";
-            
-            try (FileInputStream fis = new FileInputStream(path)) {
+        Properties env = new Properties();
+        
+        // --- CHEMIN ABSOLU DIRECT ---
+        String path = "D:/GestionMobileMoney/.env";
+        File envFile = new File(path);
+
+        if (envFile.exists()) {
+            try (FileInputStream fis = new FileInputStream(envFile)) {
                 env.load(fis);
+                System.out.println("✅ .env chargé depuis le chemin absolu : " + path);
             } catch (Exception e) {
-                // Si ça échoue, on peut mettre un chemin fixe pour le développement
-                System.out.println("DEBUG: .env non trouvé à " + path + ". Utilisation des valeurs par défaut.");
+                System.err.println("❌ Erreur de lecture du fichier .env : " + e.getMessage());
             }
+        } else {
+            System.out.println("⚠️ Fichier .env introuvable à : " + path + ". Utilisation des valeurs par défaut.");
+        }
 
-            // Lecture des variables (si le fichier n'existe pas, on met des valeurs de secours)
-            String url = env.getProperty("DB_URL", "jdbc:postgresql://localhost:5432/mobilemoney");
-            String user = env.getProperty("DB_USER", "postgres");
-            String password = env.getProperty("DB_PASSWORD", "1234");
+        // --- RÉCUPÉRATION DES VARIABLES (Avec tes valeurs par défaut) ---
+        String url = env.getProperty("DB_URL", "jdbc:postgresql://localhost:5432/mobilemoney");
+        String user = env.getProperty("DB_USER", "postgres");
+        String password = env.getProperty("DB_PASSWORD", "1234");
 
+        // --- CONNEXION ---
+        try {
             Class.forName("org.postgresql.Driver");
             con = DriverManager.getConnection(url, user, password);
-            
         } catch (Exception e) {
             System.err.println("ERREUR CONNEXION DB: " + e.getMessage());
-            e.printStackTrace();
         }
+        
         return con;
     }
 }

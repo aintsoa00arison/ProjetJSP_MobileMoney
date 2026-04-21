@@ -90,14 +90,14 @@ public class TransactionServlet extends HttpServlet {
                 
                 // Email à l'envoyeur
                 String nouveauSoldeE = String.format("%, d", envoyeur.getSolde() - totalDebitEnvoyeur);
-                String msgEnvoyeur = "Confirmation d'envoi M-Vola :\n"
+                String msgEnvoyeur = "Confirmation d'envoi NovaCash:\n"
                                    + "Montant envoyé : " + String.format("%, d", montantBase) + " Ar\n"
                                    + "Frais d'envoi : " + String.format("%, d", fraisEnv) + " Ar\n"
                                    + (payerFraisRetrait ? "Frais de retrait payés pour le destinataire : " + String.format("%, d", fraisRetraitAVerser) + " Ar\n" : "")
                                    + "---------------------------\n"
                                    + "Total débité : " + String.format("%, d", totalDebitEnvoyeur) + " Ar\n"
                                    + "Votre nouveau solde : " + nouveauSoldeE + " Ar.";
-                envoyerEmail(envoyeur.getMail(), "Confirmation d'envoi M-Vola", msgEnvoyeur);
+                envoyerEmail(envoyeur.getMail(), "Confirmation d'envoi NovaCash", msgEnvoyeur);
 
                 // Email au récepteur
                 if (recepteur != null) {
@@ -113,7 +113,7 @@ public class TransactionServlet extends HttpServlet {
                     msgRecepteur.append("Montant total crédité sur votre compte : ").append(String.format("%, d", montantFinalRecepteur)).append(" Ar.\n");
                     msgRecepteur.append("Votre nouveau solde est de : ").append(nouveauSoldeR).append(" Ar.");
                     
-                    envoyerEmail(recepteur.getMail(), "Réception de fonds M-Vola", msgRecepteur.toString());
+                    envoyerEmail(recepteur.getMail(), "Réception de fonds NovaCash", msgRecepteur.toString());
                 }
 
                 response.sendRedirect("transaction.jsp?msg=success");
@@ -146,7 +146,7 @@ public class TransactionServlet extends HttpServlet {
                 String msgRetrait = "Vous avez effectué un retrait de " + String.format("%, d", montant) + " Ar.\n"
                                   + "Frais de retrait prélevés : " + String.format("%, d", fraisRetrait) + " Ar.\n"
                                   + "Votre nouveau solde est de : " + nouveauSolde + " Ar.";
-                envoyerEmail(client.getMail(), "Alerte Retrait M-Vola", msgRetrait);
+                envoyerEmail(client.getMail(), "Alerte Retrait Novacash", msgRetrait);
 
                 response.sendRedirect("transaction.jsp?msg=success");
             }

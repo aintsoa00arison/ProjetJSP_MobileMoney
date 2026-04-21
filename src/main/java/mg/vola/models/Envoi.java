@@ -12,7 +12,7 @@ public class Envoi {
     private String raison;
     
     // Nouvelles colonnes pour les recettes
-    private int frais_env_paye; 
+    private int frais_env; 
     private int frais_retrait_paye;
 
     public Envoi() {}
@@ -40,8 +40,8 @@ public class Envoi {
     public void setRaison(String raison) { this.raison = raison; }
 
     // Nouveaux Getters et Setters pour les frais
-    public int getFrais_env() { return frais_env_paye; }
-    public void setFrais_env(int frais_env) { this.frais_env_paye= frais_env; }
+    public int getFrais_env() { return frais_env; }
+    public void setFrais_env(int frais_env) { this.frais_env= frais_env; }
 
     public int getFrais_retrait_paye() { return frais_retrait_paye; }
     public void setFrais_retrait_paye(int frais_retrait_paye) { this.frais_retrait_paye = frais_retrait_paye; }

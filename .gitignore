@@ -27,5 +27,4 @@ temp/
 Thumbs.db
 apache-tomcat-9.0.100/
 # --- Sécurité (IMPORTANT) ---
-# Si tu as un fichier de config avec tes mots de passe de base de données
-# config.properties
+

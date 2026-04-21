@@ -9,7 +9,7 @@ public class Retrait {
     private Timestamp daterecep;
     
     // Nouvelle colonne pour la recette de retrait
-    private int frais_retrait_paye;
+    private int frais_retrait;
 
     public Retrait() {}
 
@@ -26,6 +26,6 @@ public class Retrait {
     public void setDaterecep(Timestamp daterecep) { this.daterecep = daterecep; }
 
     // Nouveau Getter et Setter
-    public int getFrais_retrait() { return frais_retrait_paye; }
-    public void setFrais_retrait(int frais_retrait) { this.frais_retrait_paye= frais_retrait; }
+    public int getFrais_retrait() { return frais_retrait; }
+    public void setFrais_retrait(int frais_retrait) { this.frais_retrait= frais_retrait; }
 }

@@ -35,45 +35,49 @@
             border-radius: var(--soft-radius);
         }
 
-        /* --- DASHBOARD CONTAINER & SWITCHER --- */
-        .dashboard-container {
-            background: white;
-            border-radius: var(--soft-radius);
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
-        }
-
-        .nav-section-switcher {
-            display: flex;
-            background: #E2E8F0;
-            padding: 6px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .nav-section-switcher .nav-link {
-            flex: 1;
-            text-align: center;
-            padding: 14px 20px;
-            color: #475569;
-            font-weight: 600;
-            border: none;
-            border-radius: 10px;
-            transition: all 0.25s ease;
-            background: transparent;
-        }
-
-        .nav-section-switcher .nav-link:hover:not(.active) {
-            background-color: rgba(255, 255, 255, 0.5);
-            color: var(--main-dark);
-        }
-
-        .nav-section-switcher .nav-link.active {
-            background: white;
-            color: var(--main-dark);
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
-        }
-
+      /* --- DASHBOARD CONTAINER & SWITCHER (CORRECTION OPACITÉ) --- */
+		.dashboard-container {
+		    background: white;
+		    border-radius: var(--soft-radius);
+		    border: 1px solid var(--border-color);
+		    overflow: hidden;
+		    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+		}
+		
+		.nav-section-switcher {
+		    display: flex;
+		    background: #E2E8F0; /* Gris clair solide */
+		    padding: 6px;
+		    border-bottom: 1px solid var(--border-color);
+		}
+		
+		.nav-section-switcher .nav-link {
+		    flex: 1;
+		    text-align: center;
+		    padding: 14px 20px;
+		    /* On force la couleur et l'opacité */
+		    color: var(--main-dark) !important; 
+		    opacity: 1 !important; 
+		    font-weight: 600;
+		    border: none;
+		    border-radius: 10px;
+		    transition: all 0.2s ease;
+		    background: transparent;
+		}
+		
+		/* État au survol (non actif) */
+		.nav-section-switcher .nav-link:hover:not(.active) {
+		    background-color: rgba(255, 255, 255, 0.5) !important;
+		}
+		
+		/* État Actif : Fond blanc pur et ombre pour le relief */
+		.nav-section-switcher .nav-link.active {
+		    background-color: #FFFFFF !important;
+		    color: var(--main-dark) !important;
+		    opacity: 1 !important;
+		    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+		}
+        /* Couleurs d'accentuation sur les icônes actifs */
         .nav-link[data-bs-target="#tab-transfert"].active i { color: var(--accent-mint); }
         .nav-link[data-bs-target="#tab-retrait"].active i { color: var(--accent-rose); }
 
@@ -133,7 +137,6 @@
         .price-up { color: var(--main-dark); font-weight: 600; }
         .price-down { color: var(--accent-rose); font-weight: 600; }
 
-        /* --- BOUTONS --- */
         .btn-action {
             border-radius: var(--soft-radius);
             padding: 12px 24px;
@@ -141,8 +144,6 @@
             transition: 0.3s;
             border: none;
         }
-        .btn-mint { background: var(--accent-mint); color: var(--main-dark); }
-        .btn-mint:hover { background: #24b8a5; transform: translateY(-2px); }
 
         /* --- TOAST --- */
         .toast-container { z-index: 1100; }
@@ -177,7 +178,6 @@
 
         <div class="tab-content p-4">
 
-            <!-- ===== ONGLET TRANSFERTS ===== -->
             <div class="tab-pane fade show active" id="tab-transfert">
                 <div class="row g-4">
                     <div class="col-lg-4 border-end">
@@ -253,7 +253,6 @@
                 </div>
             </div>
 
-            <!-- ===== ONGLET RETRAITS ===== -->
             <div class="tab-pane fade" id="tab-retrait">
                 <div class="row g-4">
                     <div class="col-lg-4 border-end">
@@ -305,12 +304,10 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
 
-<!-- ===== MODAL RELEVÉ PDF ===== -->
 <div class="modal fade" id="releveModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
@@ -333,9 +330,6 @@
                         <label class="form-label">Mois du relevé</label>
                         <input type="month" name="mois" class="form-control" required>
                     </div>
-                    <div class="p-3 mb-3" style="background:#F8FAFC; border-radius: 10px; font-size: 0.82rem; color: #64748B;">
-                        Le document inclura toutes les transactions du client pour le mois sélectionné.
-                    </div>
                     <button type="submit" class="btn btn-dark w-100 py-2 fw-bold" style="border-radius: 10px;">
                         <i class="bi bi-download me-2"></i>Télécharger le document
                     </button>
@@ -345,7 +339,6 @@
     </div>
 </div>
 
-<!-- ===== MODAL CONFIRMATION ===== -->
 <div class="modal fade" id="confirmModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
@@ -371,7 +364,6 @@
     </div>
 </div>
 
-<!-- ===== TOAST NOTIFICATIONS ===== -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
     <div id="liveToast" class="toast align-items-center text-white border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
@@ -381,7 +373,6 @@
     </div>
 </div>
 
-<!-- ===== DATALIST NUMÉROS ===== -->
 <datalist id="listeNumeros">
     <% try { ClientDAO clDao = new ClientDAO(); for(Client cl : clDao.listerClients("")) { %>
         <option value="<%= cl.getNumtel() %>"><%= cl.getNom() %></option>
@@ -419,7 +410,7 @@
         }
 
         if (!num || montant < 1) {
-            showNotify('Veuillez saisir un numéro et un montant valide (min 1 Ar).', 'error');
+            showNotify('Veuillez saisir un numéro et un montant valide.', 'error');
             return;
         }
 
@@ -441,7 +432,7 @@
                 document.getElementById('btnFinal').onclick = () => document.getElementById(actionForm).submit();
                 bModal.show();
             })
-            .catch(() => showNotify('Erreur lors du calcul des frais.', 'error'));
+            .catch(() => showNotify('Erreur de calcul.', 'error'));
     }
 
     function filtrer(type) {
@@ -452,9 +443,8 @@
 
     window.onload = () => {
         const params = new URLSearchParams(window.location.search);
-        if (params.get('msg') === 'success')      showNotify('Opération validée avec succès !', 'success');
-        if (params.get('msg') === 'error_solde')  showNotify('Solde insuffisant pour cette opération.', 'error');
-        if (params.get('msg') === 'error')        showNotify('Une erreur technique est survenue.', 'error');
+        if (params.get('msg') === 'success') showNotify('Opération validée !', 'success');
+        if (params.get('msg') === 'error_solde') showNotify('Solde insuffisant.', 'error');
         window.history.replaceState({}, '', window.location.pathname);
     };
 </script>
