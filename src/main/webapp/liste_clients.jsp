@@ -268,11 +268,11 @@
                         data-bs-toggle="collapse" data-bs-target="#formulaireAjout"></button>
             </div>
             <div class="p-4">
-                <form action="ClientServlet" method="POST" class="row g-3" onsubmit="return validerAge('age_ajout')">
+                <form action="ClientServlet" method="POST" class="row g-3" onsubmit="return validerFormulaire()">
                     <input type="hidden" name="action" value="ajouter">
                     <div class="col-md-2">
                         <label class="form-label">Numéro Tel *</label>
-                        <input type="text" name="numtel" class="form-control" placeholder="034..." required>
+                        <input id='numtel_ajout' type="text" name="numtel" class="form-control" placeholder="034..." required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Nom Complet *</label>
@@ -356,7 +356,7 @@
                                 : c.getNom().toUpperCase();
                     %>
                     <tr class="align-middle client-row">
-                        <td><%= c.getNumtel() %></span></td>
+                        <td class="num-col"><%= c.getNumtel() %></span></td>
                         <td style="padding-left: 20px;">
                             <div class="d-flex align-items-center gap-2">
                                 <!-- <div class="avatar-circle"><%= initiales %></div> -->
@@ -500,6 +500,46 @@
             return false;
         }
         return true;
+    }
+
+    function validerNum(id) {
+        const numInput = document.getElementById(id);
+        if (numInput.value.length < 10 || (numInput.value.length > 10 && !numInput.value.startsWith("+"))) {
+            showNotify('Numéro invalide.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    function validerFormulaire() {
+        return validerAge('age_ajout') && validerNum('numtel_ajout');
+    }
+
+    const numInput = document.getElementById('numtel_ajout');
+    numInput.addEventListener('input', function () {
+        this.value = this.value.replace(/(?!^\+)[^0-9]/g, '');
+    });
+
+    //formattage de l'affichage du numéro de téléphone
+    const numColumns = document.getElementsByClassName('num-col');
+
+    function formatNum(num) {
+        if (!num) return num;
+
+        if (num.length === 10 && /^\d+$/.test(num)) {
+            return num.replace(/(\d{3})(\d{2})(\d{3})(\d{2})/, '$1 $2 $3 $4');
+        } 
+        else if (num.length > 10 && num.startsWith("+")) {
+            return num.replace(/(\+\d{1,3})(\d{2})(\d{2})(\d{3})(\d{2})/, '$1 $2 $3 $4 $5');
+        }
+
+        return num;
+    }
+
+
+    for (let i = 0; i < numColumns.length; i++) {
+        const rawNum = numColumns[i].innerText.trim(); // .trim() est conseillé pour nettoyer les espaces parasites
+        numColumns[i].innerText = formatNum(rawNum);
     }
 
     function ouvrirModale(num, nom, mail, sexe, age, sol) {

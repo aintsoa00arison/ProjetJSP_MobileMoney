@@ -186,11 +186,11 @@
                             <input type="hidden" name="action" value="envoyer">
                             <div class="mb-3">
                                 <label class="form-label">Numéro Expéditeur</label>
-                                <input list="listeNumeros" name="numEnvoyeur" class="form-control" placeholder="034..." required>
+                                <input list="listeNumeros" name="numEnvoyeur" class="form-control num-input" placeholder="034..." required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Numéro Bénéficiaire</label>
-                                <input list="listeNumeros" name="numRecepteur" class="form-control" placeholder="032..." required>
+                                <input list="listeNumeros" name="numRecepteur" class="form-control num-input" placeholder="032..." required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Montant (Ar)</label>
@@ -233,8 +233,8 @@
                                     %>
                                     <tr class="row-env" data-date="<%= e.getDate().toString().substring(0,10) %>">
                                         <td class="text-muted small"><%= new java.text.SimpleDateFormat("dd/MM/yy").format(e.getDate()) %></td>
-                                        <td class="fw-medium"><%= e.getNumEnvoyeur() %></td>
-                                        <td class="fw-medium"><%= e.getNumRecepteur() %></td>
+                                        <td class="fw-medium num-col"><%= e.getNumEnvoyeur() %></td>
+                                        <td class="fw-medium num-col"><%= e.getNumRecepteur() %></td>
                                         <td class="small text-muted text-truncate" style="max-width: 120px;"><%= (e.getRaison() != null && !e.getRaison().isEmpty()) ? e.getRaison() : "-" %></td>
                                         <td class="text-end price-up"><%= String.format("%,d", e.getMontant()) %></td>
                                         <td class="text-center">
@@ -261,7 +261,7 @@
                             <input type="hidden" name="action" value="retirer">
                             <div class="mb-3">
                                 <label class="form-label">Numéro du Client</label>
-                                <input list="listeNumeros" name="numtel" class="form-control" placeholder="Saisir numéro..." required>
+                                <input list="listeNumeros" name="numtel" class="form-control num-input" placeholder="Saisir numéro..." required>
                             </div>
                             <div class="mb-4">
                                 <label class="form-label">Montant du retrait (Ar)</label>
@@ -293,7 +293,7 @@
                                     %>
                                     <tr class="row-ret" data-date="<%= r.getDaterecep().toString().substring(0,10) %>">
                                         <td class="text-muted small"><%= new java.text.SimpleDateFormat("dd/MM/yy HH:mm").format(r.getDaterecep()) %></td>
-                                        <td class="fw-medium"><%= r.getNumtel() %></td>
+                                        <td class="fw-medium num-col"><%= r.getNumtel() %></td>
                                         <td class="text-center"><span class="badge-frais frais-ok"><i class="bi bi-check-circle-fill me-1"></i>Succès</span></td>
                                         <td class="text-end price-down">- <%= String.format("%,d", r.getMontant()) %></td>
                                     </tr>
@@ -439,6 +439,37 @@
         const d = (type === 'env') ? document.getElementById('dateEnv').value : document.getElementById('dateRet').value;
         const rows = (type === 'env') ? document.querySelectorAll('.row-env') : document.querySelectorAll('.row-ret');
         rows.forEach(r => r.style.display = (!d || r.dataset.date === d) ? '' : 'none');
+    }
+
+    const numInputs = document.querySelectorAll('.num-input');
+
+    numInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            let val = this.value;
+            this.value = val.replace(/(?!^)\+/g, '').replace(/[^\d+]/g, '');
+        });
+    });
+
+
+    function formatNum(num) {
+        if (!num) return num;
+
+        if (num.length === 10 && /^\d+$/.test(num)) {
+            return num.replace(/(\d{3})(\d{2})(\d{3})(\d{2})/, '$1 $2 $3 $4');
+        } 
+        else if (num.length > 10 && num.startsWith("+")) {
+            return num.replace(/(\+\d{1,3})(\d{2})(\d{2})(\d{3})(\d{2})/, '$1 $2 $3 $4 $5');
+        }
+
+        return num;
+    }
+
+    const numColumns = document.getElementsByClassName('num-col');
+
+
+    for (let i = 0; i < numColumns.length; i++) {
+        const rawNum = numColumns[i].innerText.trim(); // .trim() est conseillé pour nettoyer les espaces parasites
+        numColumns[i].innerText = formatNum(rawNum);
     }
 
     window.onload = () => {

@@ -40,12 +40,12 @@ public class ClientServlet extends HttpServlet {
                 
                 // On capture le succès ou l'échec (doublon)
                 boolean cree = clientDAO.ajouterClient(c);
-                message = cree ? "success" : "duplicate";
+                message = cree ? "added" : "duplicate";
                 
             } else if ("supprimer".equals(action)) {
                 String numtel = request.getParameter("numtel");
                 clientDAO.supprimerClient(numtel);
-                message = "success";
+                message = "deleted";
                 
             } else if ("modifier".equals(action)) {
                 Client c = new Client();
@@ -57,7 +57,7 @@ public class ClientServlet extends HttpServlet {
                 c.setMail(request.getParameter("mail"));
                 
                 clientDAO.modifierClient(c);
-                message = "success";
+                message = "updated";
             }
 
             // Redirection avec le paramètre 'msg' pour le Toast

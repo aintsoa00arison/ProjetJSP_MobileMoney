@@ -1,4 +1,4 @@
-package mg.vola.servlets;
+package main.java.mg.vola.servlets;
 
 import java.io.IOException;
 import jakarta.servlet.ServletException;

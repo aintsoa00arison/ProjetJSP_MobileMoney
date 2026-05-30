@@ -425,8 +425,24 @@
     </div>
 </div>
 
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
+    <div id="liveToast" class="toast align-items-center text-white border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body fw-bold" id="toastMsg"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    function showNotify(message, type) {
+        const toastEl = document.getElementById('liveToast');
+        document.getElementById('toastMsg').innerText = message;
+        toastEl.className = 'toast align-items-center text-white border-0 shadow-lg bg-' + (type === 'success' ? 'success' : 'danger');
+        bootstrap.Toast.getOrCreateInstance(toastEl).show();
+    }
+
     document.getElementById('searchFrais').addEventListener('keyup', function () {
         const val = this.value.toLowerCase();
         document.querySelectorAll('.frais-row').forEach(row => {
@@ -436,12 +452,22 @@
 
     function ouvrirModale(type, id, m1, m2, val) {
         document.getElementById('m_type').value = type;
-        document.getElementById('m_id').value = id;
-        document.getElementById('m_m1').value = m1;
-        document.getElementById('m_m2').value = m2;
-        document.getElementById('m_val').value = val;
-        new bootstrap.Modal(document.getElementById('modalFrais')).show();
+        document.getElementById('m_id').value   = id;
+        document.getElementById('m_m1').value   = m1;
+        document.getElementById('m_m2').value   = m2;
+        document.getElementById('m_val').value  = val;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalFrais')).show();
     }
+
+    window.onload = () => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('msg') === 'added')      showNotify('Plage de frais ajoutée avec succès !', 'success');
+        if (params.get('msg') === 'duplicated') showNotify('Cette plage existe déjà !', 'error');
+        if (params.get('msg') === 'updated')    showNotify('Plage de frais mise à jour avec succès !', 'success');
+        if (params.get('msg') === 'deleted')    showNotify('Plage de frais supprimée.', 'success');
+        if (params.get('msg') === 'error')      showNotify('Une erreur technique est survenue.', 'error');
+        window.history.replaceState({}, '', window.location.pathname);
+    };
 </script>
 </body>
 </html>

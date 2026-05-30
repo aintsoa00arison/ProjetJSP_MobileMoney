@@ -180,4 +180,40 @@ public class FraisDAO {
         }
         return 0;
     }
+
+    public boolean verifierChevauchementFraisEnvoi(int m1, int m2) throws SQLException {
+    String sql = "SELECT COUNT(*) FROM frais_envoi WHERE montant1 <= ? AND montant2 >= ?";
+    
+    try (Connection con = Connexion.getConnection();
+         PreparedStatement pst = con.prepareStatement(sql)) {
+        
+        pst.setInt(1, m2); 
+        pst.setInt(2, m1);
+        
+        try (ResultSet rs = pst.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1) > 0; 
+            }
+        }
+    }
+    return false;
+}
+    public boolean verifierChevauchementFraisRecep(int m1, int m2) throws SQLException {
+    String sql = "SELECT COUNT(*) FROM frais_recep WHERE montant1 <= ? AND montant2 >= ? ";
+    
+    try (Connection con = Connexion.getConnection();
+         PreparedStatement pst = con.prepareStatement(sql)) {
+        
+        pst.setInt(1, m2); 
+        pst.setInt(2, m1);
+        
+        try (ResultSet rs = pst.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1) > 0; // Retourne true si un chevauchement existe
+            }
+        }
+    }
+    return false;
+}
+
 }
